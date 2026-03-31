@@ -84,5 +84,3 @@ Le **Score de potentiel (0 à 100%)** est généré à la volée en pondérant l
   - **Export Data** : Modales de données brutes (`React Portals`) incluant un moteur de recherche interne et un export CSV natif formaté pour Microsoft Excel (encodage UTF-8 avec BOM).
 
 <!-- end list -->
-
-```
