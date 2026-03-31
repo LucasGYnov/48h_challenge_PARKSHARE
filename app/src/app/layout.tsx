@@ -40,11 +40,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Sidebar availableDepts={depts} />
           <div className="flex flex-col flex-1 overflow-hidden">
             <Header />
-            <main className="flex-1 overflow-y-auto bg-slate-50 px-6 lg:px-12 py-8 custom-scrollbar">
-              <div className="max-w-[1600px] mx-auto w-full">
+            
+
+            <main className="flex-1 overflow-y-auto bg-slate-50 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] px-6 lg:px-12 py-8 custom-scrollbar">
+              <div className="max-w-[1600px] mx-auto w-full relative z-10">
                 {children}
               </div>
             </main>
+            
           </div>
         </FilterProvider>
       </body>
