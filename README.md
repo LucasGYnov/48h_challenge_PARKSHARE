@@ -123,4 +123,3 @@ L'API effectue une agrégation à la volée via `/api/zones/route.ts` :
 - **Data** : ELIDRISSI Hamza
 - **Dev** : GERARD Lucas
 - **Infra** : TIEOUROU Gnatin Eymanuel
-```
