@@ -1,92 +1,168 @@
 "use client";
+import { useState } from "react";
 import { useFilters } from "@/context/FilterContext";
-import { mockZones } from "@/data/mockData";
-import { Search, SlidersHorizontal, BarChart3, Euro, Map as MapIcon } from "lucide-react";
+import { 
+  Search, SlidersHorizontal, BarChart3, Activity, 
+  Map as MapIcon, Car, AlertTriangle, Layers, 
+  Menu, X, RotateCcw 
+} from "lucide-react";
 
-export function Sidebar() {
-  const { minScore, setMinScore, maxPrice, setMaxPrice, searchQuery, setSearchQuery, selectedDept, setSelectedDept } = useFilters();
+interface SidebarProps {
+  availableDepts: { code: string; name: string }[];
+}
 
-  // --- LOGIQUE DYNAMIQUE ---
-  // On récupère les départements uniques présents dans les données
-  const deptNames: Record<string, string> = {
-    "75": "Paris", "77": "Seine-et-Marne", "78": "Yvelines", "91": "Essonne",
-    "92": "Hauts-de-Seine", "93": "Seine-Saint-Denis", "94": "Val-de-Marne", "95": "Val-d'Oise"
+export function Sidebar({ availableDepts }: SidebarProps) {
+  // État local pour gérer l'ouverture/fermeture du menu burger
+  const [isOpen, setIsOpen] = useState(true);
+
+  const { 
+    minScore, setMinScore, 
+    maxTension, setMaxTension, 
+    minMotorization, setMinMotorization,
+    searchQuery, setSearchQuery, 
+    selectedDept, setSelectedDept,
+    showCriticalOnly, setShowCriticalOnly,
+    mapMetric, setMapMetric
+  } = useFilters();
+
+  // Fonction pour remettre tous les filtres à zéro
+  const handleResetFilters = () => {
+    setMinScore(0);
+    setMaxTension(1);
+    setMinMotorization(0);
+    setSearchQuery("");
+    setSelectedDept("all");
+    setShowCriticalOnly(false);
+    setMapMetric("score");
   };
 
-  const availableDepts = Array.from(new Set(mockZones.map(z => z.zipCode.substring(0, 2))))
-    .sort()
-    .map(code => ({
-      code,
-      name: `${code} - ${deptNames[code] || 'Autre'}`
-    }));
-
   return (
-    <aside className="w-72 bg-white border-r border-slate-100 flex flex-col shrink-0 z-20">
-      <div className="p-8 space-y-10">
-        
-        {/* Recherche */}
-        <div className="space-y-4">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-            <Search className="w-3 h-3" /> Recherche
-          </label>
-          <input 
-            type="text" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Ville..." 
-            className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand transition-all"
-          />
-        </div>
+    <aside className={`bg-white border-r border-slate-100 flex flex-col shrink-0 z-20 transition-all duration-300 ease-in-out ${isOpen ? 'w-72' : 'w-20'}`}>
+      
+      {/* En-tête de la Sidebar avec le Burger Menu */}
+      <div className={`h-20 flex items-center border-b border-slate-100 shrink-0 transition-all ${isOpen ? 'justify-between px-8' : 'justify-center'}`}>
+        {isOpen && (
+          <span className="font-black text-slate-900 uppercase tracking-widest text-xs flex items-center gap-2">
+            <SlidersHorizontal className="w-4 h-4 text-brand" /> Filtres
+          </span>
+        )}
+        <button 
+          onClick={() => setIsOpen(!isOpen)} 
+          className="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-brand-dark rounded-xl transition-all shadow-sm"
+          title={isOpen ? "Fermer les filtres" : "Ouvrir les filtres"}
+        >
+          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
 
-        {/* Filtres */}
-        <div className="space-y-8">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-            <SlidersHorizontal className="w-3 h-3" /> Analyse du marché
-          </label>
-
-          {/* Dropdown Départements (Boucle sur les données) */}
-          <div className="space-y-3">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-2">
-              <MapIcon className="w-3 h-3 text-brand" /> Secteur Géo.
-            </span>
-            <select 
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="w-full bg-slate-900 text-[#f8fafc] border-none rounded-xl px-3 py-2.5 text-sm font-bold outline-none cursor-pointer hover:bg-black transition-colors"
-            >
-              <option value="all">Tous les secteurs</option>
-              {availableDepts.map((d) => (
-                <option key={d.code} value={d.code}>{d.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Slider Score */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-2"><BarChart3 className="w-3 h-3 text-brand" /> Score Min.</span>
-              <span className="text-xs font-black bg-[#0a0a0a] text-[#f8fafc] px-2 py-0.5 rounded">{minScore}%</span>
+      {/* Contenu de la Sidebar (Masqué si fermé) */}
+      <div className={`flex-1 overflow-y-auto ${isOpen ? 'p-8 opacity-100' : 'p-0 opacity-0 overflow-hidden'}`}>
+        {isOpen && (
+          <div className="space-y-10">
+            
+            {/* Recherche */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                <Search className="w-3 h-3" /> Recherche
+              </label>
+              <input 
+                type="text" value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Ville..." 
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand transition-all"
+              />
             </div>
-            <input 
-              type="range" min="0" max="100" value={minScore} 
-              onChange={(e) => setMinScore(parseInt(e.target.value))} 
-              className="w-full accent-brand h-1 cursor-pointer" 
-            />
-          </div>
 
-          {/* Slider Prix */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-2"><Euro className="w-3 h-3 text-brand" /> Prix Max</span>
-              <span className="text-xs font-black bg-[#0a0a0a] text-[#f8fafc] px-2 py-0.5 rounded">{maxPrice}€</span>
+            {/* Filtres Principaux */}
+            <div className="space-y-8">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                <SlidersHorizontal className="w-3 h-3" /> Analyse Immobilière
+              </label>
+
+              {/* Toggle Secteurs Critiques */}
+              <div 
+                className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${showCriticalOnly ? 'bg-brand/10 border-brand' : 'bg-slate-50 border-transparent hover:border-slate-200'}`}
+                onClick={() => setShowCriticalOnly(!showCriticalOnly)}
+              >
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className={`w-4 h-4 ${showCriticalOnly ? 'text-brand-dark' : 'text-slate-400'}`} />
+                  <span className={`text-xs font-bold ${showCriticalOnly ? 'text-brand-dark' : 'text-slate-500'}`}>Secteurs Critiques</span>
+                </div>
+                <div className={`w-8 h-4 rounded-full relative transition-colors ${showCriticalOnly ? 'bg-brand' : 'bg-slate-300'}`}>
+                  <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${showCriticalOnly ? 'translate-x-4' : ''}`} />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <span className="text-xs font-bold text-slate-700 flex items-center gap-2">
+                  <MapIcon className="w-3 h-3 text-brand" /> Secteur Géo.
+                </span>
+                <select 
+                  value={selectedDept}
+                  onChange={(e) => setSelectedDept(e.target.value)}
+                  className="w-full bg-[#0a0a0a] text-[#fcf8e6] border-none rounded-xl px-3 py-2.5 text-sm font-bold outline-none cursor-pointer"
+                >
+                  <option value="all">Toute l'Île-de-France</option>
+                  {availableDepts.map((d) => (
+                    <option key={d.code} value={d.code}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-slate-700 flex items-center gap-2"><BarChart3 className="w-3 h-3 text-brand" /> Score Min.</span>
+                  <span className="text-xs font-black bg-[#0a0a0a] text-[#fcf8e6] px-2 py-0.5 rounded">{minScore}%</span>
+                </div>
+                <input type="range" min="0" max="100" value={minScore} onChange={(e) => setMinScore(parseInt(e.target.value))} className="w-full accent-[#e8bf0d] h-1 cursor-pointer" />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-slate-700 flex items-center gap-2"><Activity className="w-3 h-3 text-brand" /> Tension Max.</span>
+                  <span className="text-xs font-black bg-[#0a0a0a] text-[#fcf8e6] px-2 py-0.5 rounded">{maxTension}</span>
+                </div>
+                <input type="range" min="0" max="1" step="0.1" value={maxTension} onChange={(e) => setMaxTension(parseFloat(e.target.value))} className="w-full accent-[#e8bf0d] h-1 cursor-pointer" />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-slate-700 flex items-center gap-2"><Car className="w-3 h-3 text-brand" /> Motorisation Min.</span>
+                  <span className="text-xs font-black bg-[#0a0a0a] text-[#fcf8e6] px-2 py-0.5 rounded">{minMotorization}%</span>
+                </div>
+                <input type="range" min="0" max="100" value={minMotorization} onChange={(e) => setMinMotorization(parseInt(e.target.value))} className="w-full accent-[#e8bf0d] h-1 cursor-pointer" />
+              </div>
+
             </div>
-            <input 
-              type="range" min="50" max="250" step="10" value={maxPrice} 
-              onChange={(e) => setMaxPrice(parseInt(e.target.value))} 
-              className="w-full accent-brand h-1 cursor-pointer" 
-            />
+
+            {/* Options de la Carte */}
+            <div className="space-y-4 pt-4 border-t border-slate-100">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 mb-4">
+                <Layers className="w-3 h-3" /> Rendu Carte (Secteurs)
+              </label>
+              <select 
+                value={mapMetric}
+                onChange={(e) => setMapMetric(e.target.value as "score" | "motorization")}
+                className="w-full bg-slate-100 text-slate-900 border-none rounded-xl px-3 py-2.5 text-xs font-bold outline-none cursor-pointer focus:ring-2 focus:ring-brand"
+              >
+                <option value="score">Couleurs par Score Global</option>
+                <option value="motorization">Couleurs par Motorisation</option>
+              </select>
+            </div>
+
+            {/* Bouton Reset */}
+            <div className="pt-6 border-t border-slate-100">
+              <button 
+                onClick={handleResetFilters}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-slate-100 hover:bg-[#0a0a0a] text-slate-600 hover:text-[#fcf8e6] transition-all rounded-xl text-xs font-black uppercase tracking-widest shadow-sm"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Réinitialiser
+              </button>
+            </div>
+
           </div>
-        </div>
+        )}
       </div>
     </aside>
   );

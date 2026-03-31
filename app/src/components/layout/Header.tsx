@@ -1,33 +1,36 @@
-import Image from "next/image";
+import { BarChart3 } from "lucide-react";
+import Link from "next/link";
 
 export function Header() {
   return (
-    <header className="h-16 bg-[#0a0a0a] flex items-center px-8 justify-between shrink-0 shadow-xl">
+    <header className="h-20 bg-[#0a0a0a] border-b border-white/5 flex items-center justify-between px-8 shrink-0 z-30">
       <div className="flex items-center gap-4">
-        <Image 
-          src="/logomark.png" 
-          alt="Logo Parkshare"
-          width={35} 
-          height={35}
-          className="object-contain"
-        />
-        <div className="flex flex-col leading-tight">
-          <span className="text-white font-bold text-lg tracking-tight">
+        {/* Ton Logomark Parkshare */}
+        <div className="bg-brand p-2 rounded-lg shadow-lg shadow-brand/10">
+          <img src="/logomark.png" alt="Parkshare Logo" className="w-6 h-6" />
+        </div>
+        <div>
+          <h1 className="text-[#fcf8e6] font-black tracking-tighter text-xl uppercase">
             Parkshare <span className="text-brand">Analytics</span>
-          </span>
+          </h1>
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Live Database</span>
+          </div>
         </div>
       </div>
-      
-      <div className="flex items-center gap-6">
-        <nav className="hidden md:flex gap-6 text-sm font-medium text-gray-400">
-          <span className="text-white cursor-pointer">Dashboard</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Market Map</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Reports</span>
-        </nav>
-        <button className="bg-brand hover:bg-brand-dark text-black px-4 py-1.5 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+
+      <nav className="hidden md:flex items-center gap-10">
+        <Link href="/" className="text-xs font-black text-slate-400 hover:text-brand transition-colors uppercase tracking-widest">
+          Dashboard
+        </Link>
+        <Link href="/analytics" className="text-xs font-black text-slate-400 hover:text-brand transition-colors uppercase tracking-widest">
+          Analyses
+        </Link>
+        <button className="bg-white/5 hover:bg-brand hover:text-black text-[#fcf8e6] px-5 py-2.5 rounded-xl text-xs font-black transition-all border border-white/10 uppercase tracking-widest">
           Mode Admin
         </button>
-      </div>
+      </nav>
     </header>
   );
 }

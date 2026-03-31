@@ -1,18 +1,30 @@
+// src/components/dashboard/KpiCards.tsx
 import { Card } from "../ui/Card";
-import { mockZones } from "@/data/mockData";
-import { Euro, TrendingUp, Map } from "lucide-react";
+import { ZoneData } from "@/types";
+import { Building2, Activity, Map } from "lucide-react";
 import Link from "next/link";
 
-export function KpiCards() {
-  // Calcul de moyennes pour l'analyse globale
-  const avgPrice = Math.round(mockZones.reduce((acc, zone) => acc + zone.avgParkingPrice, 0) / mockZones.length);
-  const highPotentialZones = mockZones.filter(zone => zone.potentialScore >= 80).length;
-  const avgMotorization = Math.round(mockZones.reduce((acc, zone) => acc + zone.motorizationRate, 0) / mockZones.length);
+interface KpiCardsProps {
+  zones: ZoneData[];
+}
+
+export function KpiCards({ zones }: KpiCardsProps) {
+  if (!zones || zones.length === 0) return null;
+
+  // 1. Total Buildings Analyzed
+  const totalBuildings = zones.reduce((acc, zone) => acc + zone.totalBuildings, 0);
+  
+  // 2. Average Tension (weighted by number of buildings in the zone)
+  const totalTensionAcc = zones.reduce((acc, zone) => acc + (zone.avgTension * zone.totalBuildings), 0);
+  const avgTension = (totalTensionAcc / totalBuildings).toFixed(2);
+
+  // 3. High Potential Zones
+  const highPotentialZones = zones.filter(zone => zone.potentialScore >= 80).length;
 
   const kpis = [
-    { title: "Prix Moyen (Mensuel)", value: `${avgPrice} €`, icon: Euro },
-    { title: "Zones Haut Potentiel (>80)", value: highPotentialZones, icon: TrendingUp },
-    { title: "Taux de Motorisation Moyen", value: `${avgMotorization} %`, icon: Map },
+    { title: "Résidences Analysées", value: totalBuildings.toLocaleString(), icon: Building2 },
+    { title: "Taux de Tension Moyen", value: avgTension, icon: Activity },
+    { title: "Secteurs Critiques (>80%)", value: highPotentialZones, icon: Map },
   ];
 
   return (
@@ -32,7 +44,7 @@ export function KpiCards() {
           const Icon = kpi.icon;
           return (
             <Card key={index} className="flex items-center gap-5 p-6 border-slate-100 hover:shadow-md transition-shadow">
-              <div className="p-4 rounded-2xl bg-brand-light">
+              <div className="p-4 rounded-2xl bg-brand/10">
                 <Icon className="w-7 h-7 text-brand-dark" strokeWidth={2.5} />
               </div>
               <div>

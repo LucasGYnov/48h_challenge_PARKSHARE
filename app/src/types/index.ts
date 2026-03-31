@@ -5,7 +5,9 @@ export interface ZoneData {
   lat: number;
   lng: number;
   potentialScore: number;
-  populationDensity: number;
-  motorizationRate: number; 
-  avgParkingPrice: number;
+  avgTension: number;
+  motorizationRate: number;
+  totalBuildings: number;
+  totalDwellings: number;
+  totalParking: number;
 }
