@@ -1,5 +1,3 @@
 .env
 *.sqlite3
 /node_modules
-data/parkshare.db
-app/src/data/parkshare.db
