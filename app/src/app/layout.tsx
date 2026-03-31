@@ -11,9 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Parkshare Analytics",
   description: "Optimisation du stationnement en Île-de-France",
-  icons: {
-    icon: "/logomark.svg",
-  },
+
 };
 
 async function getDepartments() {
