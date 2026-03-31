@@ -5,7 +5,7 @@ export function Header() {
   return (
     <header className="h-20 bg-[#0a0a0a] border-b border-white/5 flex items-center justify-between px-8 shrink-0 z-30">
       <div className="flex items-center gap-4">
-        {/* Ton Logomark Parkshare */}
+        {/* Logomark Parkshare */}
         <div className="bg-brand p-2 rounded-lg shadow-lg shadow-brand/10">
           <img src="/logomark.png" alt="Parkshare Logo" className="w-6 h-6" />
         </div>

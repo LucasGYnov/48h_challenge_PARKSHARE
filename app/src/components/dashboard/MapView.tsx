@@ -8,18 +8,16 @@ import { useFilters } from "@/context/FilterContext";
 import { Layers, MapPin } from "lucide-react";
 import { ZoneData } from "@/types";
 
-// 1. Définition du marqueur personnalisé (Pins Jaunes)
 const createCustomIcon = () => {
   return L.divIcon({
     className: "bg-transparent border-none",
-    html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#e8bf0d" stroke="#0a0a0a" stroke-width="1.5" style="width: 36px; height: 36px; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.25));"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="#ffffff"></circle></svg>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-    popupAnchor: [0, -36],
+    html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#e8bf0d" stroke="#0a0a0a" stroke-width="1.5" style="width: 24px; height: 24px; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.25));"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="#ffffff"></circle></svg>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 24],
+    popupAnchor: [0, -24],
   });
 };
 
-// 2. Échelle de couleurs dynamique selon la métrique choisie
 const getZoneColor = (value: number, metric: "score" | "motorization") => {
   if (value === 0) return 'transparent';
   if (metric === "score") {
@@ -35,7 +33,7 @@ interface MapViewProps {
 
 export default function MapView({ zones }: MapViewProps) {
   const { 
-    minScore, maxTension, minMotorization, 
+    minScore, maxScore, maxTension, minMotorization, 
     searchQuery, selectedDept, 
     showCriticalOnly, mapMetric 
   } = useFilters();
@@ -45,7 +43,6 @@ export default function MapView({ zones }: MapViewProps) {
 
   const parkshareIcon = createCustomIcon();
 
-  // Chargement et fusion des fichiers IDF + Paris
   useEffect(() => {
     Promise.all([
       fetch("/data/communes-ile-de-france.geojson").then(res => res.json()),
@@ -63,7 +60,6 @@ export default function MapView({ zones }: MapViewProps) {
     .catch((err) => console.error("Erreur chargement GeoJSON:", err));
   }, []);
 
-  // --- LOGIQUE DE FILTRAGE (COMMUNE AUX POINTS ET AUX SECTEURS) ---
   const filteredZones = zones.filter(zone => {
     const deptMatch = selectedDept === "all" || (zone.zipCode && String(zone.zipCode).startsWith(selectedDept));
     const tensionMatch = zone.avgTension <= maxTension;
@@ -74,16 +70,14 @@ export default function MapView({ zones }: MapViewProps) {
     
     const criticalMatch = showCriticalOnly ? (zone.potentialScore >= 80 && zone.avgTension <= 0.5) : true;
 
-    return zone.potentialScore >= minScore && tensionMatch && motorizationMatch && searchMatch && deptMatch && criticalMatch;
+    return zone.potentialScore >= minScore && zone.potentialScore <= maxScore && tensionMatch && motorizationMatch && searchMatch && deptMatch && criticalMatch;
   });
 
-  // Fonction de liaison entre le GeoJSON et les zones FILTRÉES
   const findFilteredZoneByFeature = (properties: any) => {
     if (!properties || !properties.nom) return null;
     const nomGeo = properties.nom.toLowerCase().trim();
     const normalizedParis = nomGeo.replace(" arrondissement", "").trim();
     
-    // On cherche UNIQUEMENT dans filteredZones
     return filteredZones.find(z => {
       const cityStr = String(z.city).toLowerCase().trim();
       return cityStr === nomGeo || cityStr === normalizedParis;
@@ -93,7 +87,6 @@ export default function MapView({ zones }: MapViewProps) {
   return (
     <div className="h-full w-full rounded-xl overflow-hidden relative z-0 min-h-[550px] border border-slate-200 shadow-xl bg-white">
       
-      {/* Toggle Points/Secteurs */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1000] flex bg-white p-1 rounded-2xl shadow-2xl border border-slate-200">
         <button 
           onClick={() => setViewMode("points")}
@@ -113,7 +106,6 @@ export default function MapView({ zones }: MapViewProps) {
         <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
         
         {viewMode === "points" ? (
-          // Affichage des Marqueurs filtrés
           filteredZones.map((zone) => (
             <Marker key={zone.id || zone.zipCode} position={[zone.lat, zone.lng]} icon={parkshareIcon}>
               <Popup>
@@ -129,14 +121,12 @@ export default function MapView({ zones }: MapViewProps) {
             </Marker>
           ))
         ) : (
-          // Affichage des Secteurs filtrés
           combinedGeoData && <GeoJSON 
-            key={`geojson-${mapMetric}-${filteredZones.length}`} // Key dynamique pour forcer le refresh au filtrage
+            key={`geojson-${mapMetric}-${filteredZones.length}`} 
             data={combinedGeoData} 
             style={(f) => {
               const zone = findFilteredZoneByFeature(f.properties);
               
-              // SI LA ZONE N'EST PAS DANS filteredZones, ON LA REND INVISIBLE
               if (!zone) {
                 return { fillOpacity: 0, weight: 0, color: 'transparent' };
               }

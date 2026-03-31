@@ -12,6 +12,5 @@ const MapView = dynamic(() => import("./MapView"), {
 });
 
 export function MapWrapper({ initialZones }: { initialZones: ZoneData[] }) {
-  // Pass the data down as a prop
   return <MapView zones={initialZones} />;
 }

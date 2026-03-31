@@ -1,4 +1,6 @@
 import { Charts } from "@/components/dashboard/Charts";
+import { AnalyticsSummary } from "@/components/dashboard/AnalyticsSummary";
+import { DataExport } from "@/components/dashboard/DataExport";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { openDb } from "@/lib/db";
@@ -62,7 +64,9 @@ export default async function AnalyticsPage() {
   const realZones = await getAggregatedData();
 
   return (
-    <div className="flex flex-col gap-8 h-full max-w-[1600px] mx-auto pb-10">
+    <div className="flex flex-col gap-6 w-full max-w-[1600px] mx-auto p-6 lg:p-10 pb-20">
+      
+      {/* Header Section */}
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-4 mb-3">
@@ -77,17 +81,18 @@ export default async function AnalyticsPage() {
               Analyse de <span className="highlight-yellow px-2">marché</span>
             </h1>
           </div>
-          <p className="text-slate-500 text-lg ml-14">Explorez les corrélations et les déficits de stationnement en Île-de-France.</p>
+          <p className="text-slate-500 text-lg ml-14">
+            Explorez les corrélations et exportez les données de prospection.
+          </p>
         </div>
       </div>
       
+      <AnalyticsSummary zones={realZones} />
       <Charts zones={realZones} />
-      
-      <div className="bg-[#0a0a0a] rounded-2xl shadow-xl p-8 flex flex-col items-center justify-center text-slate-400 min-h-[200px] border border-slate-800 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16"></div>
-        <p className="font-bold text-[#fcf8e6] mb-2 z-10">Export des données brutes</p>
-        <p className="text-sm z-10 text-center max-w-md">Le tableau détaillé de ces {realZones.length} secteurs sera disponible ici pour un export CSV/Excel.</p>
+      <div className="w-full">
+        <DataExport zones={realZones} />
       </div>
+
     </div>
   );
 }

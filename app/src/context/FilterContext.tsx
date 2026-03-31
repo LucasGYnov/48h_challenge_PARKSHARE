@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 interface FilterContextType {
   minScore: number;
   setMinScore: (v: number) => void;
+  maxScore: number;
+  setMaxScore: (v: number) => void;
   maxTension: number; 
   setMaxTension: (v: number) => void;
   minMotorization: number;
@@ -22,6 +24,7 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export function FilterProvider({ children }: { children: ReactNode }) {
   const [minScore, setMinScore] = useState(0);
+  const [maxScore, setMaxScore] = useState(100);
   const [maxTension, setMaxTension] = useState(1);
   const [minMotorization, setMinMotorization] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,6 +35,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   return (
     <FilterContext.Provider value={{ 
       minScore, setMinScore, 
+      maxScore, setMaxScore,
       maxTension, setMaxTension, 
       minMotorization, setMinMotorization,
       searchQuery, setSearchQuery, 

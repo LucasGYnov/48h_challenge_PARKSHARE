@@ -19,7 +19,7 @@ export function DataTableModal({ isOpen, onClose, title, data, subtitle }: DataT
   
   const itemsPerPage = 10;
 
-  // Logic: Filtrage
+  // Filtre
   const filteredData = useMemo(() => {
     return data.filter(item => 
       String(item.city).toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -27,7 +27,7 @@ export function DataTableModal({ isOpen, onClose, title, data, subtitle }: DataT
     );
   }, [data, searchTerm]);
 
-  // Logic: Tri
+  // Tri
   const sortedData = useMemo(() => {
     let sortableItems = [...filteredData];
     if (sortConfig !== null) {
@@ -40,7 +40,7 @@ export function DataTableModal({ isOpen, onClose, title, data, subtitle }: DataT
     return sortableItems;
   }, [filteredData, sortConfig]);
 
-  // Logic: Pagination
+  // Pagination
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 

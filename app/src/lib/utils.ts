@@ -6,9 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 const getZoneColor = (score: number) => {
-  return score > 90 ? '#c4a10a' : // Jaune Foncé
-         score > 70 ? '#e8bf0d' : // Jaune Parkshare
-         score > 50 ? '#f2d663' : // Jaune Moyen
-         score > 30 ? '#f9ebae' : // Jaune Clair
-                      '#fefce8';  // Jaune Très pâle
+  return score > 90 ? '#c4a10a' :
+         score > 70 ? '#e8bf0d' :
+         score > 50 ? '#f2d663' :
+         score > 30 ? '#f9ebae' : 
+                      '#fefce8'; 
 };

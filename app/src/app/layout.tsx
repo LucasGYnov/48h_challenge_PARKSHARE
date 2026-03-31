@@ -1,38 +1,49 @@
-"use client"; // On passe en client pour gérer la détection d'URL
-
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { FilterProvider } from "@/context/FilterContext";
-import { usePathname } from "next/navigation";
+import { openDb } from "@/lib/db";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  
-  // Définit ici les pages où la sidebar doit être MASQUÉE
-  // Si vous voulez la supprimer partout, passez simplement 'showSidebar' à false
-  const isAnalyticsPage = pathname.includes("/analytics");
-  const showSidebar = !isAnalyticsPage; // Masquée sur analytics
+export const metadata: Metadata = {
+  title: "Parkshare Analytics",
+  description: "Optimisation du stationnement en Île-de-France",
+  icons: {
+    icon: "/logomark.svg",
+  },
+};
+
+async function getDepartments() {
+  const db = await openDb();
+  const rows = await db.all(`
+    SELECT SUBSTR(CAST(code_postal_adresse_de_reference AS TEXT), 1, 2) as code,
+           MAX(departement) as name
+    FROM data_croisee_CLEAN
+    WHERE code_postal_adresse_de_reference IS NOT NULL 
+      AND LENGTH(CAST(code_postal_adresse_de_reference AS TEXT)) >= 2
+    GROUP BY code
+    ORDER BY code ASC
+  `);
+  return rows.map(r => ({ code: r.code, name: `${r.code} - ${r.name}` }));
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const depts = await getDepartments();
 
   return (
     <html lang="fr">
-      <head>
-        <title>Parkshare Analytics</title>
-        {/* On définit l'icône ici ou via le fichier icon.png dans /app */}
-        <link rel="icon" href="/logomark.svg" /> 
-      </head>
       <body className={`${inter.className} bg-white flex h-screen overflow-hidden`} suppressHydrationWarning={true}>
         <FilterProvider>
-          {/* La Sidebar ne s'affiche que si showSidebar est vrai */}
-          {showSidebar && <Sidebar availableDepts={[]} />} 
-          
+          <Sidebar availableDepts={depts} />
           <div className="flex flex-col flex-1 overflow-hidden">
             <Header />
-            <main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50">
-              {children}
+            <main className="flex-1 overflow-y-auto bg-slate-50 px-6 lg:px-12 py-8 custom-scrollbar">
+              <div className="max-w-[1600px] mx-auto w-full">
+                {children}
+              </div>
             </main>
           </div>
         </FilterProvider>

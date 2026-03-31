@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useFilters } from "@/context/FilterContext";
 import { 
   Search, SlidersHorizontal, BarChart3, Activity, 
@@ -12,11 +13,12 @@ interface SidebarProps {
 }
 
 export function Sidebar({ availableDepts }: SidebarProps) {
-  // État local pour gérer l'ouverture/fermeture du menu burger
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(true);
 
   const { 
     minScore, setMinScore, 
+    maxScore, setMaxScore,
     maxTension, setMaxTension, 
     minMotorization, setMinMotorization,
     searchQuery, setSearchQuery, 
@@ -25,9 +27,12 @@ export function Sidebar({ availableDepts }: SidebarProps) {
     mapMetric, setMapMetric
   } = useFilters();
 
-  // Fonction pour remettre tous les filtres à zéro
+  if (pathname.includes("/analytics")) return null;
+
+  // Réinitialisation avec Min à 0 et Max à 100
   const handleResetFilters = () => {
     setMinScore(0);
+    setMaxScore(100);
     setMaxTension(1);
     setMinMotorization(0);
     setSearchQuery("");
@@ -39,7 +44,6 @@ export function Sidebar({ availableDepts }: SidebarProps) {
   return (
     <aside className={`bg-white border-r border-slate-100 flex flex-col shrink-0 z-20 transition-all duration-300 ease-in-out ${isOpen ? 'w-72' : 'w-20'}`}>
       
-      {/* En-tête de la Sidebar avec le Burger Menu */}
       <div className={`h-20 flex items-center border-b border-slate-100 shrink-0 transition-all ${isOpen ? 'justify-between px-8' : 'justify-center'}`}>
         {isOpen && (
           <span className="font-black text-slate-900 uppercase tracking-widest text-xs flex items-center gap-2">
@@ -49,18 +53,15 @@ export function Sidebar({ availableDepts }: SidebarProps) {
         <button 
           onClick={() => setIsOpen(!isOpen)} 
           className="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-brand-dark rounded-xl transition-all shadow-sm"
-          title={isOpen ? "Fermer les filtres" : "Ouvrir les filtres"}
         >
           {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
-      {/* Contenu de la Sidebar (Masqué si fermé) */}
       <div className={`flex-1 overflow-y-auto ${isOpen ? 'p-8 opacity-100' : 'p-0 opacity-0 overflow-hidden'}`}>
         {isOpen && (
           <div className="space-y-10">
             
-            {/* Recherche */}
             <div className="space-y-4">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
                 <Search className="w-3 h-3" /> Recherche
@@ -73,13 +74,11 @@ export function Sidebar({ availableDepts }: SidebarProps) {
               />
             </div>
 
-            {/* Filtres Principaux */}
             <div className="space-y-8">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
                 <SlidersHorizontal className="w-3 h-3" /> Analyse Immobilière
               </label>
 
-              {/* Toggle Secteurs Critiques */}
               <div 
                 className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${showCriticalOnly ? 'bg-brand/10 border-brand' : 'bg-slate-50 border-transparent hover:border-slate-200'}`}
                 onClick={() => setShowCriticalOnly(!showCriticalOnly)}
@@ -100,7 +99,7 @@ export function Sidebar({ availableDepts }: SidebarProps) {
                 <select 
                   value={selectedDept}
                   onChange={(e) => setSelectedDept(e.target.value)}
-                  className="w-full bg-[#0a0a0a] text-[#fcf8e6] border-none rounded-xl px-3 py-2.5 text-sm font-bold outline-none cursor-pointer"
+                  className="w-full bg-[#0a0a0a] text-[#f8fafc] border-none rounded-xl px-3 py-2.5 text-sm font-bold outline-none cursor-pointer"
                 >
                   <option value="all">Toute l'Île-de-France</option>
                   {availableDepts.map((d) => (
@@ -109,18 +108,27 @@ export function Sidebar({ availableDepts }: SidebarProps) {
                 </select>
               </div>
 
+              {/* Fourchette de Score (Min et Max) */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-slate-700 flex items-center gap-2"><BarChart3 className="w-3 h-3 text-brand" /> Score Min.</span>
-                  <span className="text-xs font-black bg-[#0a0a0a] text-[#fcf8e6] px-2 py-0.5 rounded">{minScore}%</span>
+                  <span className="text-xs font-black bg-[#0a0a0a] text-[#f8fafc] px-2 py-0.5 rounded">{minScore}%</span>
                 </div>
                 <input type="range" min="0" max="100" value={minScore} onChange={(e) => setMinScore(parseInt(e.target.value))} className="w-full accent-[#e8bf0d] h-1 cursor-pointer" />
               </div>
 
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-slate-700 flex items-center gap-2"><BarChart3 className="w-3 h-3 text-brand" /> Score Max.</span>
+                  <span className="text-xs font-black bg-[#0a0a0a] text-[#f8fafc] px-2 py-0.5 rounded">{maxScore}%</span>
+                </div>
+                <input type="range" min="0" max="100" value={maxScore} onChange={(e) => setMaxScore(parseInt(e.target.value))} className="w-full accent-[#e8bf0d] h-1 cursor-pointer" />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-slate-700 flex items-center gap-2"><Activity className="w-3 h-3 text-brand" /> Tension Max.</span>
-                  <span className="text-xs font-black bg-[#0a0a0a] text-[#fcf8e6] px-2 py-0.5 rounded">{maxTension}</span>
+                  <span className="text-xs font-black bg-[#0a0a0a] text-[#f8fafc] px-2 py-0.5 rounded">{maxTension}</span>
                 </div>
                 <input type="range" min="0" max="1" step="0.1" value={maxTension} onChange={(e) => setMaxTension(parseFloat(e.target.value))} className="w-full accent-[#e8bf0d] h-1 cursor-pointer" />
               </div>
@@ -128,14 +136,13 @@ export function Sidebar({ availableDepts }: SidebarProps) {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-slate-700 flex items-center gap-2"><Car className="w-3 h-3 text-brand" /> Motorisation Min.</span>
-                  <span className="text-xs font-black bg-[#0a0a0a] text-[#fcf8e6] px-2 py-0.5 rounded">{minMotorization}%</span>
+                  <span className="text-xs font-black bg-[#0a0a0a] text-[#f8fafc] px-2 py-0.5 rounded">{minMotorization}%</span>
                 </div>
                 <input type="range" min="0" max="100" value={minMotorization} onChange={(e) => setMinMotorization(parseInt(e.target.value))} className="w-full accent-[#e8bf0d] h-1 cursor-pointer" />
               </div>
 
             </div>
 
-            {/* Options de la Carte */}
             <div className="space-y-4 pt-4 border-t border-slate-100">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 mb-4">
                 <Layers className="w-3 h-3" /> Rendu Carte (Secteurs)
@@ -150,11 +157,10 @@ export function Sidebar({ availableDepts }: SidebarProps) {
               </select>
             </div>
 
-            {/* Bouton Reset */}
             <div className="pt-6 border-t border-slate-100">
               <button 
                 onClick={handleResetFilters}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-slate-100 hover:bg-[#0a0a0a] text-slate-600 hover:text-[#fcf8e6] transition-all rounded-xl text-xs font-black uppercase tracking-widest shadow-sm"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-slate-100 hover:bg-[#0a0a0a] text-slate-600 hover:text-[#f8fafc] transition-all rounded-xl text-xs font-black uppercase tracking-widest shadow-sm"
               >
                 <RotateCcw className="w-4 h-4" />
                 Réinitialiser
